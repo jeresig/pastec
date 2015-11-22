@@ -31,8 +31,9 @@
 #include <messages.h>
 
 
-ORBIndex::ORBIndex(string indexPath, bool cacheImageWords)
-    : cacheImageWords(cacheImageWords)
+ORBIndex::ORBIndex(string indexPath, bool cacheImageWords, unsigned int autoSaveInterval)
+    : indexPath(indexPath), autoSaveInterval(autoSaveInterval),
+      cacheImageWords(cacheImageWords)
 {
     // Init the mutex.
     pthread_rwlock_init(&rwLock, NULL);
@@ -41,7 +42,17 @@ ORBIndex::ORBIndex(string indexPath, bool cacheImageWords)
     for (unsigned i = 0; i < NB_VISUAL_WORDS; ++i)
         nbOccurences[i] = 0;
 
+    if (indexPath == "")
+        indexPath = DEFAULT_INDEX_PATH;
+
     readIndex(indexPath);
+
+    hasUnsavedChanges = false;
+
+    if (autoSaveInterval > 0) {
+        pthread_t thread;
+        pthread_create(&thread, NULL, ORBIndex::autoSaveIndex, this);
+    }
 }
 
 
@@ -111,6 +122,8 @@ unsigned ORBIndex::getTotalNbIndexedImages()
 u_int32_t ORBIndex::addImage(unsigned i_imageId, list<HitForward> hitList)
 {
     pthread_rwlock_wrlock(&rwLock);
+    hasUnsavedChanges = true;
+
     if (nbWords.find(i_imageId) != nbWords.end())
     {
         pthread_rwlock_unlock(&rwLock);
@@ -165,6 +178,7 @@ u_int32_t ORBIndex::removeImage(const unsigned i_imageId)
         return IMAGE_NOT_FOUND;
     }
 
+    hasUnsavedChanges = true;
     nbWords.erase(imgIt);
 
     if (cacheImageWords)
@@ -382,7 +396,7 @@ bool ORBIndex::readIndex(string backwardIndexPath)
 u_int32_t ORBIndex::write(string backwardIndexPath)
 {
     if (backwardIndexPath == "")
-        backwardIndexPath = DEFAULT_INDEX_PATH;
+        backwardIndexPath = indexPath;
 
     ofstream ofs;
 
@@ -417,11 +431,30 @@ u_int32_t ORBIndex::write(string backwardIndexPath)
     ofs.close();
     cout << "Writing done." << endl;
 
+    hasUnsavedChanges = false;
+
     pthread_rwlock_unlock(&rwLock);
 
     return INDEX_WRITTEN;
 }
 
+
+void* ORBIndex::autoSaveIndex(void *index_ptr)
+{
+    ORBIndex * index = (ORBIndex*)index_ptr;
+
+    cout << "Watching for changes to auto-save..." << endl;
+
+    while(true)
+    {
+        if (index->hasUnsavedChanges)
+        {
+            cout << "Auto-saving changes..." << endl;
+            index->write("");
+        }
+        sleep(index->autoSaveInterval);
+    }
+}
 
 /**
  * @brief Clear the index.
@@ -430,6 +463,7 @@ u_int32_t ORBIndex::write(string backwardIndexPath)
 u_int32_t ORBIndex::clear()
 {
     pthread_rwlock_wrlock(&rwLock);
+    hasUnsavedChanges = true;
     // Reset the nbOccurences table.
     for (unsigned i = 0; i < NB_VISUAL_WORDS; ++i)
     {

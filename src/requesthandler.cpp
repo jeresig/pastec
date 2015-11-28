@@ -159,6 +159,8 @@ void RequestHandler::handleRequest(ConnectionInfo &conInfo)
 
         req.imageData = conInfo.uploadedData;
         req.client = NULL;
+        req.threshold = conInfo.threshold;
+
         u_int32_t i_ret = imageSearcher->searchImage(req);
 
         ret["type"] = Converter::codeToString(i_ret);
@@ -196,6 +198,8 @@ void RequestHandler::handleRequest(ConnectionInfo &conInfo)
 
         req.imageId = atoi(parsedURI[2].c_str());
         req.client = NULL;
+        req.threshold = conInfo.threshold;
+
         u_int32_t i_ret = imageSearcher->searchSimilar(req);
 
         ret["type"] = Converter::codeToString(i_ret);

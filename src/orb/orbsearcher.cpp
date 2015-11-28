@@ -133,7 +133,7 @@ u_int32_t ORBSearcher::searchImage(SearchRequest &request)
 
     const unsigned i_nbTotalIndexedImages = index->getTotalNbIndexedImages();
     const unsigned i_maxNbOccurences = i_nbTotalIndexedImages > 10000 ?
-                                       0.15 * i_nbTotalIndexedImages
+                                       request.threshold * i_nbTotalIndexedImages
                                        : i_nbTotalIndexedImages;
 
     unordered_map<u_int32_t, list<Hit> > imageReqHits; // key: visual word, value: the found angles
@@ -187,7 +187,7 @@ u_int32_t ORBSearcher::searchSimilar(SearchRequest &request)
 
     // key: visual word, value: the found angles
     unordered_map<u_int32_t, list<Hit> > imageReqHits;
-    u_int32_t i_ret = index->getImageWords(request.imageId, imageReqHits);
+    u_int32_t i_ret = index->getImageWords(request.imageId, request.threshold, imageReqHits);
 
     if (i_ret != OK)
         return i_ret;

@@ -146,6 +146,17 @@ int HTTPServer::answerToConnection(void *cls, MHD_Connection *connection,
 
         conInfo->url = string(url);
 
+        // Handle arguments from query string
+        conInfo->threshold = 0.15;
+
+        const char* threshold = MHD_lookup_connection_value(connection,
+            MHD_GET_ARGUMENT_KIND, "threshold");
+
+        if (threshold != NULL)
+        {
+            conInfo->threshold = atof(threshold);
+        }
+
         *conCls = (void *) conInfo;
 
         return MHD_YES;

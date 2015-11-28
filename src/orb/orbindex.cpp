@@ -211,13 +211,13 @@ u_int32_t ORBIndex::removeImage(const unsigned i_imageId)
  * @brief Get a list of hits associated with an image id.
  * @param  the list of hits.
  */
-u_int32_t ORBIndex::getImageWords(unsigned i_imageId, unordered_map<u_int32_t, list<Hit> > &hitList)
+u_int32_t ORBIndex::getImageWords(unsigned i_imageId, float threshold, unordered_map<u_int32_t, list<Hit> > &hitList)
 {
     pthread_rwlock_wrlock(&rwLock);
 
     const unsigned i_nbTotalIndexedImages = getTotalNbIndexedImages();
     const unsigned i_maxNbOccurences = i_nbTotalIndexedImages > 10000 ?
-                                       0.15 * i_nbTotalIndexedImages
+                                       threshold * i_nbTotalIndexedImages
                                        : i_nbTotalIndexedImages;
 
     unordered_map<u_int64_t, unsigned>::iterator imgIt =

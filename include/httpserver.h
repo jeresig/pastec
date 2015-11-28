@@ -73,6 +73,9 @@ struct ConnectionInfo
     string answerString;
     int answerCode;
 
+    // Arguments from query string
+    float threshold;
+
     vector<char> uploadedData;
 };
 

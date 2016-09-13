@@ -22,6 +22,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <unistd.h>
 #include <cstdlib>
 #include <algorithm>
 #include <sys/time.h>

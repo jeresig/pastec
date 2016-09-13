@@ -228,7 +228,7 @@ u_int32_t ORBIndex::removeImage(const unsigned i_imageId)
  */
 u_int32_t ORBIndex::getImageWords(unsigned i_imageId, float threshold, unordered_map<u_int32_t, list<Hit> > &hitList)
 {
-    pthread_rwlock_wrlock(&rwLock);
+    //pthread_rwlock_wrlock(&rwLock);
 
     const unsigned i_nbTotalIndexedImages = getTotalNbIndexedImages();
     const unsigned i_maxNbOccurences = i_nbTotalIndexedImages > 10000 ?
@@ -294,7 +294,7 @@ u_int32_t ORBIndex::getImageWords(unsigned i_imageId, float threshold, unordered
         }
     }
 
-    pthread_rwlock_unlock(&rwLock);
+    //pthread_rwlock_unlock(&rwLock);
 
     cout << "Image " << i_imageId << " found with " << hitList.size() << " words." << endl;
 

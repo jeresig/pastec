@@ -64,6 +64,7 @@ int main(int argc, char** argv)
     }
 
     unsigned i_port = 4212;
+    unsigned int autoSaveInterval = 0;
     string visualWordPath;
     string indexPath(DEFAULT_INDEX_PATH);
     bool cacheImageWords = false;
@@ -81,6 +82,11 @@ int main(int argc, char** argv)
             EXIT_IF_LAST_ARGUMENT()
             indexPath = argv[++i];
         }
+        else if (string(argv[i]) == "--auto-save")
+        {
+            EXIT_IF_LAST_ARGUMENT()
+            autoSaveInterval = atoi(argv[++i]);
+        }
         else if (string(argv[i]) == "--cache-words")
         {
             cacheImageWords = true;
@@ -97,7 +103,7 @@ int main(int argc, char** argv)
         ++i;
     }
 
-    Index *index = new ORBIndex(indexPath, cacheImageWords);
+    Index *index = new ORBIndex(indexPath, cacheImageWords, autoSaveInterval);
     ORBWordIndex *wordIndex = new ORBWordIndex(visualWordPath);
     FeatureExtractor *ife = new ORBFeatureExtractor((ORBIndex *)index, wordIndex);
     Searcher *is = new ORBSearcher((ORBIndex *)index, wordIndex);
